@@ -4,3 +4,5 @@ gunicorn==23.0.0
 whitenoise==6.9.0
 python-dotenv==1.0.1
 psycopg2-binary
+djangorestframework-simplejwt>=5.3.0
+Pillow>=10.0.0
