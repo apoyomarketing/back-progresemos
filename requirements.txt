@@ -6,3 +6,6 @@ python-dotenv==1.0.1
 psycopg2-binary
 djangorestframework-simplejwt>=5.3.0
 Pillow>=10.0.0
+django-filter==26.1
+drf-yasg==1.21.15
+django-cors-headers
