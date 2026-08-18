@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from . import services
+from .permissions import EsAdministrador
 
 
 def serializar_usuario(usuario):
@@ -23,7 +24,7 @@ def serializar_usuario(usuario):
 
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([EsAdministrador])
 def register(request):
     usuario = services.registrar_usuario(request.data)
     tokens = services.generar_tokens(usuario)
@@ -66,7 +67,52 @@ def cambiar_password(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([EsAdministrador])
 def listar_usuarios(request):
     usuarios = services.listar_usuarios()
     return Response([serializar_usuario(u) for u in usuarios])
+
+
+def serializar_rol(rol):
+    return {
+        "id": rol.id,
+        "nombre": rol.nombre,
+        "activo": rol.activo,
+        "created_at": rol.created_at,
+        "updated_at": rol.updated_at,
+    }
+
+
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def crear_rol(request):
+    rol = services.crear_rol(request.data)
+    return Response(serializar_rol(rol), status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([EsAdministrador])
+def listar_roles(request):
+    roles = services.listar_roles()
+    return Response([serializar_rol(r) for r in roles])
+
+
+@api_view(["GET"])
+@permission_classes([EsAdministrador])
+def detalle_rol(request, rol_id):
+    rol = services.obtener_rol_publico(rol_id)
+    return Response(serializar_rol(rol))
+
+
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def actualizar_rol(request, rol_id):
+    rol = services.actualizar_rol(rol_id, request.data)
+    return Response(serializar_rol(rol))
+
+
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def eliminar_rol(request, rol_id):
+    services.eliminar_rol(rol_id)
+    return Response(status=status.HTTP_204_NO_CONTENT)

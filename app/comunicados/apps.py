@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class CandidatosConfig(AppConfig):
+class ComunicadosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app.candidatos'
-    label = 'candidatos'
+    name = 'app.comunicados'
+    label = 'comunicados'

@@ -9,6 +9,10 @@ class Rol(models.Model):
         unique=True
     )
 
+    activo = models.BooleanField(
+        default=True
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True
     )

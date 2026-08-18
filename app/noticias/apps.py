@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class CmsConfig(AppConfig):
+class NoticiasConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app.cms'
-    label = 'cms'
+    name = 'app.noticias'
+    label = 'noticias'
