@@ -7,6 +7,9 @@ from .models import (
     Carrusel,
     Documento,
     ConfiguracionSitio,
+    Propuesta,
+    Estadistica,
+    Faq,
 )
 
 
@@ -14,11 +17,11 @@ class CategoriaPublicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoriaPublicacion
         fields = [
-            "id_categoria",
+            "id",
             "nombre",
             "slug",
         ]
-        read_only_fields = ["id_categoria", "slug"]
+        read_only_fields = ["id", "slug"]
 
 
 class PublicacionSerializer(serializers.ModelSerializer):
@@ -35,7 +38,7 @@ class PublicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publicacion
         fields = [
-            "id_publicacion",
+            "id",
             "categoria",
             "categoria_nombre",
             "usuario",
@@ -52,7 +55,7 @@ class PublicacionSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_publicacion",
+            "id",
             "usuario",
             "slug",
             "created_at",
@@ -69,7 +72,7 @@ class MultimediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Multimedia
         fields = [
-            "id_multimedia",
+            "id",
             "usuario",
             "usuario_nombre",
             "titulo",
@@ -86,18 +89,29 @@ class MultimediaSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_multimedia",
+            "id",
             "usuario",
             "created_at",
             "updated_at",
         ]
+
+    def validate(self, attrs):
+        archivo = attrs.get("archivo", getattr(self.instance, "archivo", None))
+        url_externa = attrs.get("url_externa", getattr(self.instance, "url_externa", None))
+
+        if not archivo and not url_externa:
+            raise serializers.ValidationError(
+                "Debe proporcionar un archivo o una URL externa."
+            )
+
+        return attrs
 
 
 class CarruselSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carrusel
         fields = [
-            "id_carrusel",
+            "id",
             "titulo",
             "subtitulo",
             "imagen",
@@ -110,7 +124,7 @@ class CarruselSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_carrusel",
+            "id",
             "created_at",
             "updated_at",
         ]
@@ -125,7 +139,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Documento
         fields = [
-            "id_documento",
+            "id",
             "usuario",
             "usuario_nombre",
             "titulo",
@@ -139,7 +153,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_documento",
+            "id",
             "usuario",
             "created_at",
             "updated_at",
@@ -150,7 +164,7 @@ class ConfiguracionSitioSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConfiguracionSitio
         fields = [
-            "id_configuracion",
+            "id",
             "nombre_partido",
             "siglas",
             "logo",
@@ -168,7 +182,71 @@ class ConfiguracionSitioSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_configuracion",
+            "id",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class PropuestaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Propuesta
+        fields = [
+            "id",
+            "titulo",
+            "descripcion",
+            "imagen",
+            "eje",
+            "orden",
+            "activo",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class EstadisticaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Estadistica
+        fields = [
+            "id",
+            "etiqueta",
+            "valor",
+            "prefijo",
+            "sufijo",
+            "orden",
+            "activo",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class FaqSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Faq
+        fields = [
+            "id",
+            "pregunta",
+            "respuesta",
+            "orden",
+            "activo",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "id",
             "created_at",
             "updated_at",
         ]

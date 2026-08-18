@@ -6,7 +6,7 @@ class CargoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cargo
         fields = [
-            "id_cargo",
+            "id",
             "nombre",
         ]
 
@@ -14,7 +14,7 @@ class CargoSerializer(serializers.ModelSerializer):
 class CandidatoSerializer(serializers.ModelSerializer):
     cargo = CargoSerializer(read_only=True)
 
-    id_cargo = serializers.PrimaryKeyRelatedField(
+    cargo_id = serializers.PrimaryKeyRelatedField(
         queryset=Cargo.objects.all(),
         source="cargo",
         write_only=True
@@ -23,8 +23,8 @@ class CandidatoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidato
         fields = [
-            "id_candidato",
-            "id_cargo",
+            "id",
+            "cargo_id",
             "cargo",
             "nombres",
             "apellido_paterno",
@@ -38,7 +38,7 @@ class CandidatoSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "id_candidato",
+            "id",
             "created_at",
             "updated_at",
         ]

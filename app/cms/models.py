@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.text import slugify
+
+from app.core.models import TimeStampedModel
+from app.core.utils import unique_slugify
 
 
-class CategoriaPublicacion(models.Model):
-    id_categoria = models.AutoField(primary_key=True)
+class CategoriaPublicacion(TimeStampedModel):
     nombre = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
 
@@ -16,33 +18,28 @@ class CategoriaPublicacion(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.nombre)
+            self.slug = unique_slugify(self, self.nombre, max_length=120)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre
 
 
-class Publicacion(models.Model):
-    ESTADO_CHOICES = [
-        ("borrador", "Borrador"),
-        ("publicado", "Publicado"),
-    ]
-
-    id_publicacion = models.AutoField(primary_key=True)
+class Publicacion(TimeStampedModel):
+    class Estado(models.TextChoices):
+        BORRADOR = "borrador", "Borrador"
+        PUBLICADO = "publicado", "Publicado"
 
     categoria = models.ForeignKey(
         CategoriaPublicacion,
         on_delete=models.PROTECT,
         related_name="publicaciones",
-        db_column="id_categoria"
     )
 
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="publicaciones",
-        db_column="id_usuario"
     )
 
     titulo = models.CharField(max_length=255)
@@ -57,39 +54,35 @@ class Publicacion(models.Model):
     )
 
     fecha_publicacion = models.DateTimeField(null=True, blank=True)
-    estado = models.CharField(max_length=30, choices=ESTADO_CHOICES, default="borrador")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    estado = models.CharField(max_length=30, choices=Estado.choices, default=Estado.BORRADOR)
 
     class Meta:
         db_table = "publicaciones"
         ordering = ["-created_at"]
         verbose_name = "Publicación"
         verbose_name_plural = "Publicaciones"
+        indexes = [
+            models.Index(fields=["estado", "-fecha_publicacion"], name="pub_estado_fecha_idx"),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.titulo)
+            self.slug = unique_slugify(self, self.titulo, max_length=255)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.titulo
 
 
-class Multimedia(models.Model):
-    TIPO_CHOICES = [
-        ("imagen", "Imagen"),
-        ("video", "Video"),
-    ]
-
-    id_multimedia = models.AutoField(primary_key=True)
+class Multimedia(TimeStampedModel):
+    class Tipo(models.TextChoices):
+        IMAGEN = "imagen", "Imagen"
+        VIDEO = "video", "Video"
 
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="multimedia",
-        db_column="id_usuario",
         null=True,
         blank=True
     )
@@ -97,7 +90,7 @@ class Multimedia(models.Model):
     titulo = models.CharField(max_length=255, blank=True)
     descripcion = models.TextField(blank=True)
 
-    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
+    tipo = models.CharField(max_length=30, choices=Tipo.choices)
 
     archivo = models.FileField(
         upload_to="multimedia/",
@@ -115,10 +108,7 @@ class Multimedia(models.Model):
 
     fecha_publicacion = models.DateTimeField(null=True, blank=True)
     orden = models.IntegerField(default=0)
-    activo = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    activo = models.BooleanField(default=True, db_index=True)
 
     class Meta:
         db_table = "multimedia"
@@ -127,12 +117,10 @@ class Multimedia(models.Model):
         verbose_name_plural = "Multimedia"
 
     def __str__(self):
-        return self.titulo or f"{self.tipo} #{self.id_multimedia}"
+        return self.titulo or f"{self.tipo} #{self.pk}"
 
 
-class Carrusel(models.Model):
-    id_carrusel = models.AutoField(primary_key=True)
-
+class Carrusel(TimeStampedModel):
     titulo = models.CharField(max_length=255, blank=True)
     subtitulo = models.CharField(max_length=255, blank=True)
 
@@ -142,10 +130,7 @@ class Carrusel(models.Model):
     url_boton = models.URLField(max_length=500, blank=True)
 
     orden = models.IntegerField(default=0)
-    activo = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    activo = models.BooleanField(default=True, db_index=True)
 
     class Meta:
         db_table = "carrusel"
@@ -154,17 +139,14 @@ class Carrusel(models.Model):
         verbose_name_plural = "Carrusel"
 
     def __str__(self):
-        return self.titulo or f"Carrusel #{self.id_carrusel}"
+        return self.titulo or f"Carrusel #{self.pk}"
 
 
-class Documento(models.Model):
-    id_documento = models.AutoField(primary_key=True)
-
+class Documento(TimeStampedModel):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="documentos",
-        db_column="id_usuario",
         null=True,
         blank=True
     )
@@ -176,10 +158,7 @@ class Documento(models.Model):
     tipo_archivo = models.CharField(max_length=50, blank=True)
 
     fecha_publicacion = models.DateTimeField(null=True, blank=True)
-    activo = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    activo = models.BooleanField(default=True, db_index=True)
 
     class Meta:
         db_table = "documentos"
@@ -191,9 +170,7 @@ class Documento(models.Model):
         return self.titulo
 
 
-class ConfiguracionSitio(models.Model):
-    id_configuracion = models.AutoField(primary_key=True)
-
+class ConfiguracionSitio(TimeStampedModel):
     nombre_partido = models.CharField(max_length=255)
     siglas = models.CharField(max_length=50, blank=True)
 
@@ -220,13 +197,97 @@ class ConfiguracionSitio(models.Model):
     tiktok = models.URLField(max_length=500, blank=True)
     youtube = models.URLField(max_length=500, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         db_table = "configuracion_sitio"
         verbose_name = "Configuración del sitio"
         verbose_name_plural = "Configuración del sitio"
 
+    def clean(self):
+        if self._state.adding and ConfiguracionSitio.objects.exists():
+            raise ValidationError(
+                "La configuración del sitio ya existe. "
+                "Utilice el registro existente para modificarla."
+            )
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and ConfiguracionSitio.objects.exists():
+            raise ValidationError(
+                "La configuración del sitio ya existe. "
+                "Utilice el registro existente para modificarla."
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.nombre_partido
+
+
+class Propuesta(TimeStampedModel):
+    class Eje(models.TextChoices):
+        EDUCACION = "educacion", "Educación"
+        SALUD = "salud", "Salud"
+        SEGURIDAD = "seguridad", "Seguridad"
+        ECONOMIA = "economia", "Economía"
+        INFRAESTRUCTURA = "infraestructura", "Infraestructura"
+        AGRICULTURA = "agricultura", "Agricultura"
+        INNOVACION = "innovacion", "Innovación"
+        DESARROLLO_REGIONAL = "desarrollo_regional", "Desarrollo Regional"
+
+    titulo = models.CharField(max_length=255)
+    descripcion = models.TextField(blank=True)
+
+    imagen = models.ImageField(
+        upload_to="propuestas/",
+        null=True,
+        blank=True
+    )
+
+    eje = models.CharField(max_length=30, choices=Eje.choices)
+
+    orden = models.IntegerField(default=0)
+    activo = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        db_table = "propuestas"
+        ordering = ["orden", "-created_at"]
+        verbose_name = "Propuesta"
+        verbose_name_plural = "Propuestas"
+
+    def __str__(self):
+        return self.titulo
+
+
+class Estadistica(TimeStampedModel):
+    etiqueta = models.CharField(max_length=100)
+    valor = models.PositiveIntegerField()
+
+    prefijo = models.CharField(max_length=10, blank=True)
+    sufijo = models.CharField(max_length=20, blank=True)
+
+    orden = models.IntegerField(default=0)
+    activo = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        db_table = "estadisticas"
+        ordering = ["orden"]
+        verbose_name = "Estadística"
+        verbose_name_plural = "Estadísticas"
+
+    def __str__(self):
+        return self.etiqueta
+
+
+class Faq(TimeStampedModel):
+    pregunta = models.CharField(max_length=255)
+    respuesta = models.TextField()
+
+    orden = models.IntegerField(default=0)
+    activo = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        db_table = "faqs"
+        ordering = ["orden"]
+        verbose_name = "Pregunta frecuente"
+        verbose_name_plural = "Preguntas frecuentes"
+
+    def __str__(self):
+        return self.pregunta

@@ -1,7 +1,9 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
+
+from app.core.mixins import PublicReadAuthenticatedWriteMixin
 
 from .models import (
     CategoriaPublicacion,
@@ -10,6 +12,9 @@ from .models import (
     Carrusel,
     Documento,
     ConfiguracionSitio,
+    Propuesta,
+    Estadistica,
+    Faq,
 )
 
 from .serializers import (
@@ -19,15 +24,10 @@ from .serializers import (
     CarruselSerializer,
     DocumentoSerializer,
     ConfiguracionSitioSerializer,
+    PropuestaSerializer,
+    EstadisticaSerializer,
+    FaqSerializer,
 )
-
-
-class PublicReadAuthenticatedWriteMixin:
-    def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
-            return [permissions.AllowAny()]
-
-        return [permissions.IsAdminUser()]
 
 
 class CategoriaPublicacionViewSet(
@@ -54,14 +54,14 @@ class PublicacionViewSet(
         ).all()
 
         if not self.request.user.is_authenticated:
-            queryset = queryset.filter(estado="publicado")
+            queryset = queryset.filter(estado=Publicacion.Estado.PUBLICADO)
 
         return queryset
 
     def perform_create(self, serializer):
-        estado = serializer.validated_data.get("estado", "borrador")
+        estado = serializer.validated_data.get("estado", Publicacion.Estado.BORRADOR)
 
-        if estado == "publicado":
+        if estado == Publicacion.Estado.PUBLICADO:
             serializer.save(
                 usuario=self.request.user,
                 fecha_publicacion=timezone.now()
@@ -75,7 +75,7 @@ class PublicacionViewSet(
             serializer.instance.estado
         )
 
-        if estado == "publicado" and serializer.instance.fecha_publicacion is None:
+        if estado == Publicacion.Estado.PUBLICADO and serializer.instance.fecha_publicacion is None:
             serializer.save(fecha_publicacion=timezone.now())
         else:
             serializer.save()
@@ -158,3 +158,54 @@ class ConfiguracionSitioViewSet(
             )
 
         return super().create(request, *args, **kwargs)
+
+
+class PropuestaViewSet(
+    PublicReadAuthenticatedWriteMixin,
+    viewsets.ModelViewSet
+):
+    serializer_class = PropuestaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["eje", "activo"]
+
+    def get_queryset(self):
+        queryset = Propuesta.objects.all()
+
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(activo=True)
+
+        return queryset
+
+
+class EstadisticaViewSet(
+    PublicReadAuthenticatedWriteMixin,
+    viewsets.ModelViewSet
+):
+    serializer_class = EstadisticaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["activo"]
+
+    def get_queryset(self):
+        queryset = Estadistica.objects.all()
+
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(activo=True)
+
+        return queryset
+
+
+class FaqViewSet(
+    PublicReadAuthenticatedWriteMixin,
+    viewsets.ModelViewSet
+):
+    serializer_class = FaqSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["activo"]
+
+    def get_queryset(self):
+        queryset = Faq.objects.all()
+
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(activo=True)
+
+        return queryset

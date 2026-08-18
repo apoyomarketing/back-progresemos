@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class UbicacionesConfig(AppConfig):
+class CoreConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app.ubicaciones'
-    label = 'ubicaciones'
+    name = 'app.core'
+    label = 'core'

@@ -7,19 +7,22 @@ from .models import (
     Carrusel,
     Documento,
     ConfiguracionSitio,
+    Propuesta,
+    Estadistica,
+    Faq,
 )
 
 
 @admin.register(CategoriaPublicacion)
 class CategoriaPublicacionAdmin(admin.ModelAdmin):
-    list_display = ("id_categoria", "nombre", "slug")
+    list_display = ("id", "nombre", "slug")
     search_fields = ("nombre", "slug")
 
 
 @admin.register(Publicacion)
 class PublicacionAdmin(admin.ModelAdmin):
     list_display = (
-        "id_publicacion",
+        "id",
         "titulo",
         "categoria",
         "usuario",
@@ -49,7 +52,7 @@ class PublicacionAdmin(admin.ModelAdmin):
 @admin.register(Multimedia)
 class MultimediaAdmin(admin.ModelAdmin):
     list_display = (
-        "id_multimedia",
+        "id",
         "titulo",
         "tipo",
         "usuario",
@@ -77,7 +80,7 @@ class MultimediaAdmin(admin.ModelAdmin):
 @admin.register(Carrusel)
 class CarruselAdmin(admin.ModelAdmin):
     list_display = (
-        "id_carrusel",
+        "id",
         "titulo",
         "orden",
         "activo",
@@ -100,7 +103,7 @@ class CarruselAdmin(admin.ModelAdmin):
 @admin.register(Documento)
 class DocumentoAdmin(admin.ModelAdmin):
     list_display = (
-        "id_documento",
+        "id",
         "titulo",
         "usuario",
         "tipo_archivo",
@@ -128,7 +131,7 @@ class DocumentoAdmin(admin.ModelAdmin):
 @admin.register(ConfiguracionSitio)
 class ConfiguracionSitioAdmin(admin.ModelAdmin):
     list_display = (
-        "id_configuracion",
+        "id",
         "nombre_partido",
         "siglas",
         "correo",
@@ -146,3 +149,27 @@ class ConfiguracionSitioAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
+
+@admin.register(Propuesta)
+class PropuestaAdmin(admin.ModelAdmin):
+    list_display = ("id", "titulo", "eje", "activo", "orden")
+    list_filter = ("eje", "activo")
+    search_fields = ("titulo", "descripcion")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(Estadistica)
+class EstadisticaAdmin(admin.ModelAdmin):
+    list_display = ("id", "etiqueta", "valor", "prefijo", "sufijo", "activo", "orden")
+    list_filter = ("activo",)
+    search_fields = ("etiqueta",)
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(Faq)
+class FaqAdmin(admin.ModelAdmin):
+    list_display = ("id", "pregunta", "activo", "orden")
+    list_filter = ("activo",)
+    search_fields = ("pregunta", "respuesta")
+    readonly_fields = ("created_at", "updated_at")

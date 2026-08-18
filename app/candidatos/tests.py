@@ -39,6 +39,18 @@ class CandidatosAPITests(APITestCase):
             1
         )
 
+    def test_cargos_son_publicos(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(
+            reverse("cargos-list")
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
     def test_crear_cargo(self):
         response = self.client.post(
             reverse("cargos-list"),
@@ -59,7 +71,7 @@ class CandidatosAPITests(APITestCase):
             ).exists()
         )
 
-    def test_candidatos_requiere_autenticacion(self):
+    def test_candidatos_son_publicos(self):
         self.client.force_authenticate(user=None)
 
         response = self.client.get(
@@ -68,14 +80,33 @@ class CandidatosAPITests(APITestCase):
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_401_UNAUTHORIZED
+            status.HTTP_200_OK
+        )
+
+    def test_candidato_inactivo_no_es_publico(self):
+        self.client.force_authenticate(user=None)
+
+        Candidato.objects.create(
+            cargo=self.cargo,
+            nombres="Oculto",
+            apellido_paterno="Perez",
+            activo=False,
+        )
+
+        response = self.client.get(
+            reverse("candidatos-list")
+        )
+
+        self.assertEqual(
+            response.data["count"],
+            0
         )
 
     def test_crear_candidato(self):
         response = self.client.post(
             reverse("candidatos-list"),
             {
-                "id_cargo": self.cargo.pk,
+                "cargo_id": self.cargo.pk,
                 "nombres": "Juan Carlos",
                 "apellido_paterno": "Perez",
                 "apellido_materno": "Quispe",

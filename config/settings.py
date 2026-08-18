@@ -70,13 +70,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'app.api.apps.ApiConfig',
+    'app.core.apps.CoreConfig',
     'app.usuarios.apps.UsuariosConfig',
-    'app.ubicaciones.apps.UbicacionesConfig',
     'app.candidatos.apps.CandidatosConfig',
     'app.cms.apps.CmsConfig',
     "corsheaders",
 ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework configuration
 REST_FRAMEWORK = {
