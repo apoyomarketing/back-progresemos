@@ -1,8 +1,16 @@
 from django.contrib.auth import authenticate
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import AuthenticationFailed, NotFound, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from .models import Usuario
+from .models import Rol, Usuario
+
+
+def _parse_bool(value, default):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ("true", "1", "on", "yes")
 
 
 def generar_tokens(usuario):
@@ -77,3 +85,60 @@ def cambiar_password(usuario, password_actual, password_nuevo):
 
 def listar_usuarios():
     return Usuario.objects.select_related("rol").all().order_by("id")
+
+
+def crear_rol(data):
+    nombre = data.get("nombre")
+
+    if not nombre:
+        raise ValidationError({"nombre": "El nombre es obligatorio."})
+
+    if Rol.objects.filter(nombre__iexact=nombre).exists():
+        raise ValidationError({"nombre": "Ya existe un rol con este nombre."})
+
+    return Rol.objects.create(nombre=nombre)
+
+
+def listar_roles():
+    return Rol.objects.filter(activo=True).order_by("nombre")
+
+
+def obtener_rol(rol_id):
+    """Búsqueda interna (sin filtrar por activo) para actualizar/eliminar/reactivar."""
+    try:
+        return Rol.objects.get(pk=rol_id)
+    except Rol.DoesNotExist:
+        raise NotFound("El rol no existe.")
+
+
+def obtener_rol_publico(rol_id):
+    rol = obtener_rol(rol_id)
+
+    if not rol.activo:
+        raise NotFound("El rol no existe.")
+
+    return rol
+
+
+def actualizar_rol(rol_id, data):
+    rol = obtener_rol(rol_id)
+    nombre = data.get("nombre")
+
+    if nombre:
+        if Rol.objects.filter(nombre__iexact=nombre).exclude(pk=rol.pk).exists():
+            raise ValidationError({"nombre": "Ya existe un rol con este nombre."})
+
+        rol.nombre = nombre
+
+    if "activo" in data:
+        rol.activo = _parse_bool(data["activo"], rol.activo)
+
+    rol.save()
+
+    return rol
+
+
+def eliminar_rol(rol_id):
+    rol = obtener_rol(rol_id)
+    rol.activo = False
+    rol.save(update_fields=["activo"])

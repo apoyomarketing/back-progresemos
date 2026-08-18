@@ -70,8 +70,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'app.core.apps.CoreConfig',
     'app.usuarios.apps.UsuariosConfig',
-    'app.candidatos.apps.CandidatosConfig',
-    'app.cms.apps.CmsConfig',
+    'app.propuestas.apps.PropuestasConfig',
+    'app.noticias.apps.NoticiasConfig',
+    'app.comunicados.apps.ComunicadosConfig',
     'corsheaders',
 ]
 
