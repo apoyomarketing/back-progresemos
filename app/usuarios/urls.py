@@ -1,18 +1,11 @@
 from django.urls import path
-from rest_framework.authtoken import views as auth_views
-from rest_framework.routers import SimpleRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from . import views
-
-router = SimpleRouter()
-router.register(r'roles', views.RolViewSet, basename='roles')
-router.register(r'usuarios', views.UsuarioViewSet, basename='usuarios')
+from . import controllers
 
 urlpatterns = [
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/me/', views.me, name='me'),
-    path('auth-token/', auth_views.obtain_auth_token, name='api-token'),
-    *router.urls,
+    path('usuarios/register/', controllers.register, name='usuarios-register'),
+    path('usuarios/login/', controllers.login, name='usuarios-login'),
+    path('usuarios/logout/', controllers.logout, name='usuarios-logout'),
+    path('usuarios/cambiar-password/', controllers.cambiar_password, name='usuarios-cambiar-password'),
+    path('usuarios/', controllers.listar_usuarios, name='usuarios-list'),
 ]
