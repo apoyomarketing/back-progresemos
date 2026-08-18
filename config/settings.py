@@ -50,10 +50,8 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+# TODO: restringir a CORS_ALLOWED_ORIGINS cuando el front esté integrado.
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_URLS_REGEX = r"^/api/.*$"
 
