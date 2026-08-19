@@ -87,6 +87,73 @@ def listar_usuarios():
     return Usuario.objects.select_related("rol").all().order_by("id")
 
 
+def obtener_usuario(usuario_id):
+    try:
+        return Usuario.objects.get(pk=usuario_id)
+    except Usuario.DoesNotExist:
+        raise NotFound("El usuario no existe.")
+
+
+def actualizar_usuario(usuario_id, data, actor):
+    usuario = obtener_usuario(usuario_id)
+
+    if "nombre" in data:
+        nombre = data["nombre"]
+        if not nombre:
+            raise ValidationError({"nombre": "El nombre no puede estar vacío."})
+        usuario.nombre = nombre
+
+    if "email" in data:
+        email = data["email"]
+        if not email:
+            raise ValidationError({"email": "El email no puede estar vacío."})
+        if Usuario.objects.filter(email__iexact=email).exclude(pk=usuario.pk).exists():
+            raise ValidationError({"email": "Ya existe un usuario con este correo."})
+        usuario.email = email
+
+    if "rol" in data:
+        usuario.rol_id = data["rol"] or None
+
+    if "estado" in data:
+        nuevo_estado = _parse_bool(data["estado"], usuario.estado)
+        if usuario.pk == actor.id and not nuevo_estado:
+            raise ValidationError("No podés desactivarte a vos mismo.")
+        usuario.estado = nuevo_estado
+
+    usuario.save()
+
+    return usuario
+
+
+def eliminar_usuario(usuario_id, actor):
+    if usuario_id == actor.id:
+        raise ValidationError("No podés eliminarte a vos mismo.")
+
+    usuario = obtener_usuario(usuario_id)
+    usuario.estado = False
+    usuario.save(update_fields=["estado"])
+
+    return usuario
+
+
+def resetear_password_usuario(usuario_id, password_nuevo, actor):
+    if usuario_id == actor.id:
+        raise ValidationError(
+            "No podés resetear tu propia contraseña por acá. Usá /usuarios/cambiar-password/."
+        )
+
+    usuario = obtener_usuario(usuario_id)
+
+    if not password_nuevo:
+        raise ValidationError({"password_nuevo": "La nueva contraseña es obligatoria."})
+
+    if len(password_nuevo) < 8:
+        raise ValidationError({"password_nuevo": "La nueva contraseña debe tener al menos 8 caracteres."})
+
+    usuario.set_password(password_nuevo)
+    usuario.save(update_fields=["password"])
+
+
 def crear_rol(data):
     nombre = data.get("nombre")
 
