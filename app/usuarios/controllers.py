@@ -73,6 +73,27 @@ def listar_usuarios(request):
     return Response([serializar_usuario(u) for u in usuarios])
 
 
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def actualizar_usuario(request, usuario_id):
+    usuario = services.actualizar_usuario(usuario_id, request.data, request.user)
+    return Response(serializar_usuario(usuario))
+
+
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def eliminar_usuario(request, usuario_id):
+    usuario = services.eliminar_usuario(usuario_id, request.user)
+    return Response(serializar_usuario(usuario))
+
+
+@api_view(["POST"])
+@permission_classes([EsAdministrador])
+def resetear_password_usuario(request, usuario_id):
+    services.resetear_password_usuario(usuario_id, request.data.get("password_nuevo"), request.user)
+    return Response({"detail": "Contraseña actualizada correctamente."})
+
+
 def serializar_rol(rol):
     return {
         "id": rol.id,
