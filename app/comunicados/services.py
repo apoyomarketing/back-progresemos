@@ -90,6 +90,7 @@ def eliminar_comunicado(comunicado_id):
     comunicado = obtener_comunicado(comunicado_id)
     comunicado.activo = False
     comunicado.save(update_fields=["activo"])
+    return comunicado
 
 
 def listar_comunicados():

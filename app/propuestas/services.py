@@ -86,6 +86,7 @@ def eliminar_propuesta(propuesta_id):
     propuesta = obtener_propuesta(propuesta_id)
     propuesta.activo = False
     propuesta.save(update_fields=["activo"])
+    return propuesta
 
 
 def listar_propuestas():

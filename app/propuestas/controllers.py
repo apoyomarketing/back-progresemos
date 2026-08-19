@@ -15,9 +15,6 @@ def serializar_propuesta(propuesta, request):
         "foto": request.build_absolute_uri(propuesta.foto.url) if propuesta.foto else None,
         "descripcion": propuesta.descripcion,
         "orden": propuesta.orden,
-        "activo": propuesta.activo,
-        "created_at": propuesta.created_at,
-        "updated_at": propuesta.updated_at,
     }
 
 
@@ -55,5 +52,5 @@ def actualizar(request, propuesta_id):
 @api_view(["POST"])
 @permission_classes([EsAdministradorOEditor])
 def eliminar(request, propuesta_id):
-    services.eliminar_propuesta(propuesta_id)
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    propuesta = services.eliminar_propuesta(propuesta_id)
+    return Response(serializar_propuesta(propuesta, request))

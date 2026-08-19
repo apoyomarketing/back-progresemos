@@ -92,6 +92,7 @@ def eliminar_noticia(noticia_id):
     noticia = obtener_noticia(noticia_id)
     noticia.activo = False
     noticia.save(update_fields=["activo"])
+    return noticia
 
 
 def listar_noticias():

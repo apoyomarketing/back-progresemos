@@ -16,9 +16,6 @@ def serializar_noticia(noticia, request):
         "descripcion": noticia.descripcion,
         "fecha": noticia.fecha,
         "lugar": noticia.lugar,
-        "activo": noticia.activo,
-        "created_at": noticia.created_at,
-        "updated_at": noticia.updated_at,
     }
 
 
@@ -56,5 +53,5 @@ def actualizar(request, noticia_id):
 @api_view(["POST"])
 @permission_classes([EsAdministradorOEditor])
 def eliminar(request, noticia_id):
-    services.eliminar_noticia(noticia_id)
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    noticia = services.eliminar_noticia(noticia_id)
+    return Response(serializar_noticia(noticia, request))
