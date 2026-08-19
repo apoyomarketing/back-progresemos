@@ -15,9 +15,6 @@ def serializar_comunicado(comunicado, request):
         "multimedia": request.build_absolute_uri(comunicado.multimedia.url) if comunicado.multimedia else None,
         "descripcion": comunicado.descripcion,
         "fecha": comunicado.fecha,
-        "activo": comunicado.activo,
-        "created_at": comunicado.created_at,
-        "updated_at": comunicado.updated_at,
     }
 
 
@@ -55,5 +52,5 @@ def actualizar(request, comunicado_id):
 @api_view(["POST"])
 @permission_classes([EsAdministradorOEditor])
 def eliminar(request, comunicado_id):
-    services.eliminar_comunicado(comunicado_id)
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    comunicado = services.eliminar_comunicado(comunicado_id)
+    return Response(serializar_comunicado(comunicado, request))
