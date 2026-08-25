@@ -87,6 +87,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_RATES': {
+        'voluntarios': '10/min',
+    },
 }
 
 SIMPLE_JWT = {
