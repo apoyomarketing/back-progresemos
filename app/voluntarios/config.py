@@ -18,26 +18,9 @@ def _leer(nombre, defecto):
     return getattr(settings, nombre, defecto)
 
 
-# =====================================================================
-#  API KEY DE DECOLECTA  —  VERSIÓN DE PRUEBAS
-# =====================================================================
-#  Está escrita aquí a propósito para que el despliegue de prueba
-#  funcione sin configurar nada.
-#
-#  ANTES DE PRODUCCIÓN:
-#    1. Comprar el plan y generar una key nueva en Decolecta.
-#    2. Ponerla como variable API_KEY_DELCO en Coolify.
-#    3. Dejar el valor de abajo como "".
-#    4. ROTAR la key vieja: borrarla de aquí NO la borra del historial
-#       de git.
-#
-#  Si API_KEY_DELCO ya existe en el entorno, esa gana y este valor
-#  se ignora.
-# =====================================================================
-API_KEY_DELCO = _leer(
-    "API_KEY_DELCO",
-    "sk_18536.ouTTAjiKnuJMjJONJJs9AqdmX7vhgQuP",  # TEMPORAL — key de pruebas
-)
+# API key de Decolecta. Se toma de la variable de entorno API_KEY_DELCO
+# (en Coolify o en .env local); sin ella, consultar_dni() rechaza con 503.
+API_KEY_DELCO = _leer("API_KEY_DELCO", "")
 
 DECOLECTA_URL = _leer("DECOLECTA_URL", "https://api.decolecta.com/v1/reniec/dni")
 
