@@ -30,6 +30,7 @@ def crear_noticia(data, archivos):
     descripcion = data.get("descripcion", "")
     fecha = _parse_fecha(data.get("fecha"), None)
     lugar = data.get("lugar", "")
+    categoria = data.get("categoria", "")
     activo = _parse_bool(data.get("activo"), True)
 
     if not titulo:
@@ -41,6 +42,7 @@ def crear_noticia(data, archivos):
         descripcion=descripcion,
         fecha=fecha,
         lugar=lugar,
+        categoria=categoria,
         activo=activo,
     )
 
@@ -79,6 +81,9 @@ def actualizar_noticia(noticia_id, data, archivos):
 
     if "lugar" in data:
         noticia.lugar = data["lugar"]
+
+    if "categoria" in data:
+        noticia.categoria = data["categoria"]
 
     if "activo" in data:
         noticia.activo = _parse_bool(data["activo"], noticia.activo)

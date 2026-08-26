@@ -14,6 +14,7 @@ def serializar_propuesta(propuesta, request):
         "titulo": propuesta.titulo,
         "foto": request.build_absolute_uri(propuesta.foto.url) if propuesta.foto else None,
         "descripcion": propuesta.descripcion,
+        "categoria": propuesta.categoria,
         "orden": propuesta.orden,
     }
 

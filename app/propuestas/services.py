@@ -24,6 +24,7 @@ def crear_propuesta(data, archivos):
     titulo = data.get("titulo")
     foto = archivos.get("foto")
     descripcion = data.get("descripcion", "")
+    categoria = data.get("categoria", "")
     orden = _parse_int(data.get("orden"), 0)
     activo = _parse_bool(data.get("activo"), True)
 
@@ -37,6 +38,7 @@ def crear_propuesta(data, archivos):
         titulo=titulo,
         foto=foto,
         descripcion=descripcion,
+        categoria=categoria,
         orden=orden,
         activo=activo,
     )
@@ -70,6 +72,9 @@ def actualizar_propuesta(propuesta_id, data, archivos):
 
     if "descripcion" in data:
         propuesta.descripcion = data["descripcion"]
+
+    if "categoria" in data:
+        propuesta.categoria = data["categoria"]
 
     if "orden" in data:
         propuesta.orden = _parse_int(data["orden"], propuesta.orden)
