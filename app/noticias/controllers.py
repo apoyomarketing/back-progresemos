@@ -16,6 +16,7 @@ def serializar_noticia(noticia, request):
         "descripcion": noticia.descripcion,
         "fecha": noticia.fecha,
         "lugar": noticia.lugar,
+        "categoria": noticia.categoria,
     }
 
 

@@ -7,6 +7,7 @@ class Propuesta(TimeStampedModel):
     titulo = models.CharField(max_length=255)
     foto = models.ImageField(upload_to="propuesta/")
     descripcion = models.TextField(blank=True)
+    categoria = models.CharField(max_length=100, blank=True)
 
     orden = models.IntegerField(default=0)
     activo = models.BooleanField(default=True)

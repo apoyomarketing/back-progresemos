@@ -9,6 +9,7 @@ class Noticia(TimeStampedModel):
     descripcion = models.TextField(blank=True)
     fecha = models.DateField(null=True, blank=True)
     lugar = models.CharField(max_length=255, blank=True)
+    categoria = models.CharField(max_length=100, blank=True)
     activo = models.BooleanField(default=True)
 
     class Meta:
