@@ -3,6 +3,7 @@ import logging
 import re
 
 from django.db import IntegrityError, transaction
+from rest_framework.exceptions import NotFound, ValidationError
 
 from . import decolecta
 from .decolecta import ErrorDni
@@ -113,3 +114,64 @@ def registrar(dni, celular, acepta_whatsapp, request):
             raise YaRegistrado(duplicado.codigo)
         logger.exception("IntegrityError sin DNI duplicado (¿colisión de código?)")
         raise
+
+
+def obtener_voluntario_por_codigo(codigo):
+    try:
+        return Voluntario.objects.get(codigo=codigo)
+    except Voluntario.DoesNotExist:
+        raise NotFound("El afiliado no existe.")
+
+
+def obtener_voluntario_por_dni(dni):
+    try:
+        return Voluntario.objects.get(dni=dni)
+    except Voluntario.DoesNotExist:
+        raise NotFound("El afiliado no existe.")
+
+
+def buscar_voluntarios(nombre=None, dni=None):
+    qs = Voluntario.objects.all()
+
+    if dni:
+        qs = qs.filter(dni__icontains=dni)
+
+    if nombre:
+        qs = qs.filter(nombre_completo__icontains=nombre)
+
+    return qs
+
+
+def guardar_foto(codigo, archivo):
+    if not archivo:
+        raise ValidationError({"foto": "La foto es obligatoria."})
+
+    voluntario = obtener_voluntario_por_codigo(codigo)
+    voluntario.foto = archivo
+    voluntario.save(update_fields=["foto"])
+    return voluntario
+
+
+def actualizar_rol_afiliado(codigo, rol_name):
+    from app.asistencia.models import RolAfiliado
+
+    if not rol_name:
+        raise ValidationError({"rol_afiliado": "El rol es obligatorio."})
+
+    try:
+        rol = RolAfiliado.objects.get(rol_name=rol_name)
+    except RolAfiliado.DoesNotExist:
+        raise ValidationError({"rol_afiliado": "Rol inválido."})
+
+    voluntario = obtener_voluntario_por_codigo(codigo)
+    voluntario.rol_afiliado = rol
+    voluntario.save(update_fields=["rol_afiliado"])
+    return voluntario
+
+
+def eliminar(codigo):
+    """Baja lógica: no se borra la fila, para no romper el historial de asistencia."""
+    voluntario = obtener_voluntario_por_codigo(codigo)
+    voluntario.estado = Voluntario.BAJA
+    voluntario.save(update_fields=["estado"])
+    return voluntario

@@ -2,6 +2,7 @@ from rest_framework.permissions import BasePermission
 
 ADMINISTRADOR = "Administrador"
 EDITOR = "Editor"
+COORDINADOR = "Coordinador"
 
 
 def _nombre_rol(usuario):
@@ -32,3 +33,15 @@ class EsAdministradorOEditor(BasePermission):
             return False
 
         return _es_administrador(usuario) or _nombre_rol(usuario) == EDITOR
+
+
+class EsAdministradorEditorOCoordinador(BasePermission):
+    message = "Se requiere el rol Administrador, Editor o Coordinador."
+
+    def has_permission(self, request, view):
+        usuario = request.user
+
+        if not (usuario and usuario.is_authenticated):
+            return False
+
+        return _es_administrador(usuario) or _nombre_rol(usuario) in (EDITOR, COORDINADOR)

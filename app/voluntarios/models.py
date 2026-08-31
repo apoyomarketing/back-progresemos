@@ -13,6 +13,12 @@ validador_celular = RegexValidator(
 SECUENCIA_CODIGO = "voluntarios_codigo_seq"
 
 
+def _rol_afiliado_default():
+    from app.asistencia.models import RolAfiliado
+
+    return RolAfiliado.objects.get(rol_name=RolAfiliado.AFILIADO).pk
+
+
 def generar_codigo() -> str:
     """
     Devuelve el siguiente código correlativo: PRG-0001, PRG-0002, …
@@ -52,6 +58,14 @@ class Voluntario(TimeStampedModel):
     nombre_completo = models.CharField(max_length=255)
     celular = models.CharField(max_length=9, validators=[validador_celular])
     acepta_whatsapp = models.BooleanField(default=False)
+    foto = models.ImageField(upload_to="voluntario/", null=True, blank=True)
+    rol_afiliado = models.ForeignKey(
+        "asistencia.RolAfiliado",
+        db_column="id_rol_afiliado",
+        on_delete=models.PROTECT,
+        default=_rol_afiliado_default,
+        related_name="voluntarios",
+    )
     estado = models.CharField(max_length=20, choices=ESTADOS, default=PREINSCRITO)
     origen = models.CharField(max_length=40, default="web_unete")
     ip = models.GenericIPAddressField(null=True, blank=True)
