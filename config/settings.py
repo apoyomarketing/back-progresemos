@@ -53,7 +53,7 @@ CSRF_TRUSTED_ORIGINS = [
 # TODO: restringir a CORS_ALLOWED_ORIGINS cuando el front esté integrado.
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_URLS_REGEX = r"^/api/.*$"
+CORS_URLS_REGEX = r"^/(api|media)/.*$"
 
 # Application definition
 

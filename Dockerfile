@@ -11,6 +11,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# gosu lets the entrypoint start as root (to fix ownership of the
+# /media volume, which Docker creates as root:root) and then drop
+# privileges to appuser before running gunicorn.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gosu \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the rest of the application
 COPY . .
 
@@ -18,8 +25,6 @@ RUN chmod +x entrypoint.sh \
     && mkdir -p /app/staticfiles \
     && adduser --disabled-password --no-create-home --gecos "" appuser \
     && chown -R appuser:appuser /app
-
-USER appuser
 
 EXPOSE 8000
 

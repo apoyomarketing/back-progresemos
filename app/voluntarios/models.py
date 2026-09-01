@@ -58,7 +58,7 @@ class Voluntario(TimeStampedModel):
     nombre_completo = models.CharField(max_length=255)
     celular = models.CharField(max_length=9, validators=[validador_celular])
     acepta_whatsapp = models.BooleanField(default=False)
-    foto = models.ImageField(upload_to="voluntario/", null=True, blank=True)
+    foto = models.ImageField(upload_to="perfiles/", null=True, blank=True)
     rol_afiliado = models.ForeignKey(
         "asistencia.RolAfiliado",
         db_column="id_rol_afiliado",
