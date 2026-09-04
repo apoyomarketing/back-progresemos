@@ -152,6 +152,24 @@ def guardar_foto(codigo, archivo):
     return voluntario
 
 
+def actualizar_foto_por_dni(dni, archivo):
+    """Reemplaza la foto de un voluntario ya registrado, identificado por DNI.
+
+    A diferencia de guardar_foto (usada en el registro), esta borra el
+    archivo anterior del storage para no dejar huérfanos en MEDIA_ROOT.
+    """
+    if not archivo:
+        raise ValidationError({"foto": "La foto es obligatoria."})
+
+    voluntario = obtener_voluntario_por_dni(dni)
+    foto_anterior = voluntario.foto
+    voluntario.foto = archivo
+    voluntario.save(update_fields=["foto"])
+    if foto_anterior:
+        foto_anterior.delete(save=False)
+    return voluntario
+
+
 def actualizar_rol_afiliado(codigo, rol_name):
     from app.asistencia.models import RolAfiliado
 

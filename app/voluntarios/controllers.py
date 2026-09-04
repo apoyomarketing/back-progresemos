@@ -103,6 +103,16 @@ def subir_foto(request, codigo):
     return Response(serializar_voluntario(voluntario, request))
 
 
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@throttle_classes([VoluntariosThrottle])
+def actualizar_foto(request, dni):
+    """POST /api/voluntarios/<dni>/actualizar-foto/ — reemplaza la foto de un voluntario ya registrado."""
+    voluntario = services.actualizar_foto_por_dni(dni, request.FILES.get("foto"))
+    return Response(serializar_voluntario(voluntario, request))
+
+
 @api_view(["GET"])
 @authentication_classes([])
 @permission_classes([AllowAny])
