@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from app.usuarios.permissions import EsAdministradorEditorOCoordinador
+from app.usuarios.permissions import EsAdministradorOCoordinador
 
 from . import services
 from .decolecta import ErrorDni
@@ -124,7 +124,7 @@ def obtener_por_dni(request, dni):
 
 
 @api_view(["GET"])
-@permission_classes([EsAdministradorEditorOCoordinador])
+@permission_classes([EsAdministradorOCoordinador])
 def buscar(request):
     """GET /api/voluntarios/buscar/?nombre=&dni= — búsqueda interna (staff)."""
     voluntarios = services.buscar_voluntarios(
@@ -135,7 +135,7 @@ def buscar(request):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorEditorOCoordinador])
+@permission_classes([EsAdministradorOCoordinador])
 def actualizar_rol(request, codigo):
     """POST /api/voluntarios/<codigo>/rol/ — cambia el rol de afiliado (staff).
 
@@ -150,7 +150,7 @@ def actualizar_rol(request, codigo):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorEditorOCoordinador])
+@permission_classes([EsAdministradorOCoordinador])
 def eliminar(request, codigo):
     """POST /api/voluntarios/<codigo>/eliminar/ — baja lógica (staff)."""
     voluntario = services.eliminar(codigo)

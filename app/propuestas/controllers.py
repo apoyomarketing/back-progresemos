@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from app.usuarios.permissions import EsAdministradorOEditor
+from app.usuarios.permissions import EsAdministradorEditorOCoordinador
 
 from . import services
 
@@ -20,7 +20,7 @@ def serializar_propuesta(propuesta, request):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def crear(request):
     propuesta = services.crear_propuesta(request.data, request.FILES)
     return Response(
@@ -44,14 +44,14 @@ def detalle(request, propuesta_id):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def actualizar(request, propuesta_id):
     propuesta = services.actualizar_propuesta(propuesta_id, request.data, request.FILES)
     return Response(serializar_propuesta(propuesta, request))
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def eliminar(request, propuesta_id):
     propuesta = services.eliminar_propuesta(propuesta_id)
     return Response(serializar_propuesta(propuesta, request))

@@ -23,8 +23,8 @@ class EsAdministrador(BasePermission):
         return bool(usuario and usuario.is_authenticated and _es_administrador(usuario))
 
 
-class EsAdministradorOEditor(BasePermission):
-    message = "Se requiere el rol Administrador o Editor."
+class EsAdministradorOCoordinador(BasePermission):
+    message = "Se requiere el rol Administrador o Coordinador."
 
     def has_permission(self, request, view):
         usuario = request.user
@@ -32,7 +32,7 @@ class EsAdministradorOEditor(BasePermission):
         if not (usuario and usuario.is_authenticated):
             return False
 
-        return _es_administrador(usuario) or _nombre_rol(usuario) == EDITOR
+        return _es_administrador(usuario) or _nombre_rol(usuario) == COORDINADOR
 
 
 class EsAdministradorEditorOCoordinador(BasePermission):
