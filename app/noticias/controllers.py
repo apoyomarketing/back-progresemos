@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from app.usuarios.permissions import EsAdministradorOEditor
+from app.usuarios.permissions import EsAdministradorEditorOCoordinador
 
 from . import services
 
@@ -21,7 +21,7 @@ def serializar_noticia(noticia, request):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def crear(request):
     noticia = services.crear_noticia(request.data, request.FILES)
     return Response(
@@ -45,14 +45,14 @@ def detalle(request, noticia_id):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def actualizar(request, noticia_id):
     noticia = services.actualizar_noticia(noticia_id, request.data, request.FILES)
     return Response(serializar_noticia(noticia, request))
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def eliminar(request, noticia_id):
     noticia = services.eliminar_noticia(noticia_id)
     return Response(serializar_noticia(noticia, request))

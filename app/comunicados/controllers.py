@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from app.usuarios.permissions import EsAdministradorOEditor
+from app.usuarios.permissions import EsAdministradorEditorOCoordinador
 
 from . import services
 
@@ -19,7 +19,7 @@ def serializar_comunicado(comunicado, request):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def crear(request):
     comunicado = services.crear_comunicado(request.data, request.FILES)
     return Response(
@@ -43,14 +43,14 @@ def detalle(request, comunicado_id):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def actualizar(request, comunicado_id):
     comunicado = services.actualizar_comunicado(comunicado_id, request.data, request.FILES)
     return Response(serializar_comunicado(comunicado, request))
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOEditor])
+@permission_classes([EsAdministradorEditorOCoordinador])
 def eliminar(request, comunicado_id):
     comunicado = services.eliminar_comunicado(comunicado_id)
     return Response(serializar_comunicado(comunicado, request))
