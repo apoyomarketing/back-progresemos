@@ -29,17 +29,17 @@ def serializar_voluntario(voluntario, request):
         "estado": voluntario.estado,
         "foto": request.build_absolute_uri(voluntario.foto.url) if voluntario.foto else None,
         "fecha_afiliacion": voluntario.created_at,
+        "rol_afiliado": voluntario.rol_afiliado.rol_name if voluntario.rol_afiliado else "afiliado",
     }
 
 
 def serializar_voluntario_admin(voluntario, request):
-    """Igual que serializar_voluntario pero con el id interno y el rol de afiliado —
+    """Igual que serializar_voluntario pero con el id interno —
     solo para vistas de staff (buscar/, rol/, eliminar/), que necesitan el id como
-    voluntario_id al pasar asistencia y el rol para poder mostrarlo/editarlo. No se
-    usa en los endpoints públicos para no exponer el PK ahí."""
+    voluntario_id al pasar asistencia. No se usa en los endpoints públicos para no 
+    exponer el PK ahí."""
     return {
         "id": voluntario.id,
-        "rol_afiliado": voluntario.rol_afiliado.rol_name,
         **serializar_voluntario(voluntario, request),
     }
 
@@ -135,15 +135,14 @@ def buscar(request):
 
 
 @api_view(["POST"])
-@permission_classes([EsAdministradorOCoordinador])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@throttle_classes([VoluntariosThrottle])
 def actualizar_rol(request, codigo):
-    """POST /api/voluntarios/<codigo>/rol/ — cambia el rol de afiliado (staff).
+    """POST /api/voluntarios/<codigo>/rol/ — cambia el rol de afiliado.
 
-    El catálogo de roles (RolAfiliado) está pensado como de solo lectura por API
-    ("se administra desde el admin de Django" — ver app/asistencia/models.py), pero
-    el CMS necesita reasignar el rol de un afiliado puntual (p. ej. de simpatizante
-    a organizador), no crear/editar el catálogo en sí, así que este endpoint solo
-    reasigna la FK de un Voluntario existente a un rol ya existente del catálogo.
+    Este endpoint permite a una persona pública o al CMS reasignar el rol de un 
+    afiliado (p. ej. a organizador). El código sirve como validación.
     """
     voluntario = services.actualizar_rol_afiliado(codigo, request.data.get("rol_afiliado"))
     return Response(serializar_voluntario_admin(voluntario, request))
