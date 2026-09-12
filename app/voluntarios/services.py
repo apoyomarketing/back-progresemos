@@ -130,7 +130,7 @@ def obtener_voluntario_por_dni(dni):
         raise NotFound("El afiliado no existe.")
 
 
-def buscar_voluntarios(nombre=None, dni=None):
+def buscar_voluntarios(nombre=None, dni=None, rol=None):
     qs = Voluntario.objects.all()
 
     if dni:
@@ -138,6 +138,9 @@ def buscar_voluntarios(nombre=None, dni=None):
 
     if nombre:
         qs = qs.filter(nombre_completo__icontains=nombre)
+        
+    if rol:
+        qs = qs.filter(rol_afiliado__rol_name__icontains=rol)
 
     return qs
 
