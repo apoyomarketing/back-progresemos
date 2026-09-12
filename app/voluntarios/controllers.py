@@ -130,6 +130,7 @@ def buscar(request):
     voluntarios = services.buscar_voluntarios(
         nombre=request.query_params.get("nombre"),
         dni=request.query_params.get("dni"),
+        rol=request.query_params.get("rol"),
     )
     return Response([serializar_voluntario_admin(v, request) for v in voluntarios])
 
