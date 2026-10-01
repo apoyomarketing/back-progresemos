@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'app.comunicados.apps.ComunicadosConfig',
     'app.voluntarios.apps.VoluntariosConfig',
     'app.asistencia.apps.AsistenciaConfig',
+    'app.escrutinio.apps.EscrutinioConfig',
     'corsheaders',
 ]
 
