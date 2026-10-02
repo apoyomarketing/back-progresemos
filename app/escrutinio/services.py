@@ -5,7 +5,7 @@ from .models import Voto, LocalVotacion, Partido
 def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
     """
     Registra los votos de una mesa específica.
-    `tipo_eleccion` es 'REGIONAL', 'PROVINCIAL' o 'DISTRITAL'
+    `tipo_eleccion` es 'REGIONAL', 'CONSEJERO', 'PROVINCIAL' o 'DISTRITAL'
     `datos_votos` es una lista de diccionarios: [{'id_partido': 1, 'cant_voto': 150}, ...]
     """
     with transaction.atomic():

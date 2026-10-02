@@ -32,9 +32,10 @@ class Partido(models.Model):
 
 class Voto(models.Model):
     TIPO_ELECCION_CHOICES = [
-        ('REGIONAL', 'REGIONAL'),
-        ('PROVINCIAL', 'PROVINCIAL'),
-        ('DISTRITAL', 'DISTRITAL'),
+        ('REGIONAL', 'Regional'),
+        ('CONSEJERO', 'Consejero Regional'),
+        ('PROVINCIAL', 'Provincial'),
+        ('DISTRITAL', 'Distrital'),
     ]
 
     id_voto = models.AutoField(primary_key=True)
