@@ -26,6 +26,7 @@ def serializar_voluntario(voluntario, request):
         "codigo": voluntario.codigo,
         "dni": voluntario.dni,
         "nombre_completo": voluntario.nombre_completo,
+        "celular": voluntario.celular,
         "estado": voluntario.estado,
         "foto": request.build_absolute_uri(voluntario.foto.url) if voluntario.foto else None,
         "fecha_afiliacion": voluntario.created_at,
