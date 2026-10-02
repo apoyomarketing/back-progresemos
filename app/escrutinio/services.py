@@ -11,6 +11,26 @@ def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
     with transaction.atomic():
         local = LocalVotacion.objects.get(id_local=id_local)
         
+        # Calcular el límite de votos según el tipo de elección
+        if tipo_eleccion == 'DISTRITAL':
+            limite_votos = local.electores_municipal
+        else:
+            limite_votos = local.electores_regional
+            
+        # Obtener los votos actuales del local para esta elección, excluyendo la mesa actual (para sobreescribirla en el cálculo)
+        total_actual = Voto.objects.filter(
+            local=local, 
+            tipo_eleccion=tipo_eleccion
+        ).exclude(
+            nro_mesa=nro_mesa
+        ).aggregate(total=Sum('cant_voto'))['total'] or 0
+        
+        # Calcular los nuevos votos a ingresar para esta mesa
+        nuevos_votos_mesa = sum(int(dato.get('cant_voto', 0)) for dato in datos_votos)
+        
+        if total_actual + nuevos_votos_mesa > limite_votos:
+            raise ValueError(f"La cantidad total de votos ({total_actual + nuevos_votos_mesa}) excede la cantidad de electores admitidos ({limite_votos}) para este local.")
+        
         # Validar y crear/actualizar cada voto
         votos_creados = []
         for dato in datos_votos:
