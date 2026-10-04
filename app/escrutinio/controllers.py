@@ -127,3 +127,30 @@ def resultados_dashboard(request):
     return Response(resultado)
 
 
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def cobertura_mesas(request):
+    """
+    Reporte de cobertura de mesas por local de votacion.
+    Indica cuantas mesas faltan por registrar en cada local.
+
+    Query params opcionales:
+      - distrito: filtra por nombre de distrito (case-insensitive)
+      - id_local: filtra por un local especifico
+    """
+    distrito = request.query_params.get('distrito')
+    id_local = request.query_params.get('id_local')
+
+    if id_local:
+        try:
+            id_local = int(id_local)
+        except ValueError:
+            return Response({"error": "id_local debe ser un numero entero."}, status=400)
+
+    resultado = services.cobertura_mesas(
+        distrito=distrito,
+        id_local=id_local,
+    )
+    return Response(resultado)

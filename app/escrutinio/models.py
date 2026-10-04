@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 class LocalVotacion(models.Model):
     id_local = models.IntegerField(primary_key=True)
@@ -48,6 +49,8 @@ class Voto(models.Model):
     class Meta:
         db_table = 'voto'
         unique_together = ('local', 'nro_mesa', 'tipo_eleccion', 'partido')
+        # Nota: nro_mesa debe ser único globalmente entre mesas del mismo tipo_eleccion.
+        # Esta validación se aplica en el servicio (validate_nro_mesa_unico).
 
     def __str__(self):
         return f"{self.cant_voto} votos - {self.partido.nombre_partido} - Mesa {self.nro_mesa} ({self.tipo_eleccion})"
