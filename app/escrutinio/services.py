@@ -1,6 +1,26 @@
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Count, Q
 from django.db import transaction
 from .models import Voto, LocalVotacion, Partido
+
+
+def validate_nro_mesa_unico(nro_mesa, tipo_eleccion, id_local_actual=None):
+    """
+    Valida que el número de mesa no esté ya registrado en otro local,
+    independientemente del tipo de elección.
+    Un número de mesa es físicamente único: pertenece a un solo local.
+    Si se pasa id_local_actual, permite que la mesa ya exista en ESE local
+    (registrar los 4 tipos de elección para la misma mesa del mismo local está permitido).
+    """
+    qs = Voto.objects.filter(nro_mesa=str(nro_mesa))
+    if id_local_actual is not None:
+        qs = qs.exclude(local_id=id_local_actual)
+    if qs.exists():
+        otro_local = qs.values_list('local__nombre_local', 'local__id_local').first()
+        raise ValueError(
+            f"El número de mesa '{nro_mesa}' ya está registrado en el local "
+            f"'{otro_local[0]}' (id: {otro_local[1]}). "
+            f"Los números de mesa son únicos a nivel global (independiente del tipo de elección)."
+        )
 
 def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
     """
@@ -10,6 +30,9 @@ def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
     """
     with transaction.atomic():
         local = LocalVotacion.objects.get(id_local=id_local)
+        
+        # Validar que el número de mesa no esté repetido en otro local
+        validate_nro_mesa_unico(nro_mesa, tipo_eleccion, id_local_actual=id_local)
         
         # Calcular el límite de votos según el tipo de elección
         if tipo_eleccion == 'DISTRITAL':
@@ -241,3 +264,69 @@ def obtener_dashboard_resultados(tipo_eleccion='PROVINCIAL', modo='provincial', 
     return res
 
 
+def cobertura_mesas(distrito=None, id_local=None):
+    """
+    Retorna el estado de cobertura de mesas por local de votación.
+    Para cada local muestra:
+      - Total de mesas esperadas (cant_mesas del local).
+      - Mesas ya registradas en el sistema (con al menos un voto digitado).
+      - Mesas faltantes por llenar.
+    Acepta filtros opcionales por `distrito` y/o `id_local`.
+    """
+    locales_qs = LocalVotacion.objects.all()
+
+    if distrito:
+        locales_qs = locales_qs.filter(distrito__iexact=distrito)
+    if id_local:
+        locales_qs = locales_qs.filter(id_local=id_local)
+
+    locales_qs = locales_qs.order_by('distrito', 'nombre_local')
+
+    resultado = []
+    total_mesas_esperadas = 0
+    total_mesas_registradas = 0
+
+    for local in locales_qs:
+        mesas_registradas = (
+            Voto.objects
+            .filter(local=local)
+            .values('nro_mesa')
+            .distinct()
+            .count()
+        )
+        mesas_esperadas = local.cant_mesas
+        mesas_faltantes = max(mesas_esperadas - mesas_registradas, 0)
+
+        total_mesas_esperadas += mesas_esperadas
+        total_mesas_registradas += mesas_registradas
+
+        resultado.append({
+            'id_local': local.id_local,
+            'nombre_local': local.nombre_local,
+            'direccion': local.direccion_local or '',
+            'distrito': local.distrito,
+            'provincia': local.provincia,
+            'mesas_esperadas': mesas_esperadas,
+            'mesas_registradas': mesas_registradas,
+            'mesas_faltantes': mesas_faltantes,
+            'pct_cobertura': round(
+                (mesas_registradas * 100.0 / mesas_esperadas), 2
+            ) if mesas_esperadas > 0 else 0.0,
+        })
+
+    return {
+        'filtros': {
+            'distrito': distrito,
+            'id_local': id_local,
+        },
+        'resumen': {
+            'total_locales': len(resultado),
+            'total_mesas_esperadas': total_mesas_esperadas,
+            'total_mesas_registradas': total_mesas_registradas,
+            'total_mesas_faltantes': max(total_mesas_esperadas - total_mesas_registradas, 0),
+            'pct_cobertura_global': round(
+                (total_mesas_registradas * 100.0 / total_mesas_esperadas), 2
+            ) if total_mesas_esperadas > 0 else 0.0,
+        },
+        'locales': resultado,
+    }

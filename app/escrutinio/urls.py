@@ -9,4 +9,5 @@ urlpatterns = [
     path('resultados/dashboard/', controllers.resultados_dashboard, name='resultados_dashboard'),
     path('resultados/provincial/', controllers.resultados_provinciales, name='resultados_provinciales'),
     path('resultados/local/<int:id_local>/', controllers.resultados_local, name='resultados_local'),
+    path('cobertura/', controllers.cobertura_mesas, name='cobertura_mesas'),
 ]
