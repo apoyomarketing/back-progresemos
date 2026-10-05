@@ -4,6 +4,7 @@ from . import controllers
 urlpatterns = [
     path('locales/', controllers.listar_locales, name='listar_locales'),
     path('partidos/', controllers.gestionar_partidos, name='gestionar_partidos'),
+    path('votos/estado/', controllers.estado_votos, name='estado_votos'),
     path('votos/', controllers.registrar_votos, name='registrar_votos'),
     path('matriz/', controllers.obtener_matriz, name='obtener_matriz'),
     path('resultados/dashboard/', controllers.resultados_dashboard, name='resultados_dashboard'),

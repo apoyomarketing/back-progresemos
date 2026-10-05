@@ -3,6 +3,11 @@ from django.db import transaction
 from .models import Voto, LocalVotacion, Partido
 
 
+class ActaYaRegistradaError(Exception):
+    """Se lanza cuando ya existe un acta para la combinación (id_local, nro_mesa, tipo_eleccion)."""
+    pass
+
+
 def validate_nro_mesa_unico(nro_mesa, tipo_eleccion, id_local_actual=None):
     """
     Valida que el número de mesa no esté ya registrado en otro local,
@@ -30,7 +35,19 @@ def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
     """
     with transaction.atomic():
         local = LocalVotacion.objects.get(id_local=id_local)
-        
+
+        # Verificar si ya existe un acta registrada para esta combinación
+        ya_existe = Voto.objects.filter(
+            local=local,
+            nro_mesa=str(nro_mesa),
+            tipo_eleccion=tipo_eleccion
+        ).exists()
+        if ya_existe:
+            raise ActaYaRegistradaError(
+                f"Ya existe un acta registrada para la Mesa N° {nro_mesa} "
+                f"con tipo {tipo_eleccion} en el local '{local.nombre_local}'."
+            )
+
         # Validar que el número de mesa no esté repetido en otro local
         validate_nro_mesa_unico(nro_mesa, tipo_eleccion, id_local_actual=id_local)
         
@@ -68,6 +85,22 @@ def registrar_votos_mesa(id_local, nro_mesa, tipo_eleccion, datos_votos):
             votos_creados.append(voto)
             
         return votos_creados
+
+def obtener_tipos_registrados(id_local, nro_mesa):
+    """
+    Retorna la lista de tipos de elección que ya tienen acta registrada
+    para la combinación (id_local, nro_mesa).
+    Ejemplo de retorno: ['REGIONAL', 'PROVINCIAL']
+    """
+    tipos = (
+        Voto.objects
+        .filter(local_id=id_local, nro_mesa=str(nro_mesa))
+        .values_list('tipo_eleccion', flat=True)
+        .distinct()
+        .order_by('tipo_eleccion')
+    )
+    return list(tipos)
+
 
 def obtener_resultados_provinciales(provincia, tipo_eleccion):
     """

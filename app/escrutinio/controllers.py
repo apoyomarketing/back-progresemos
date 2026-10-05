@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from . import services, serializers
 from .models import LocalVotacion, Partido
+from .services import ActaYaRegistradaError
 
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
@@ -68,8 +69,36 @@ def registrar_votos(request):
             datos_votos=data['votos']
         )
         return Response({"mensaje": f"{len(serv_votos)} registros de votos guardados correctamente."})
+    except ActaYaRegistradaError as e:
+        return Response({"error": str(e)}, status=409)
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def estado_votos(request):
+    """
+    Retorna los tipos de elección ya registrados para una mesa en un local.
+    Query params requeridos: id_local, nro_mesa
+    Ejemplo de respuesta: { "tipos_registrados": ["REGIONAL", "PROVINCIAL"] }
+    """
+    id_local = request.query_params.get('id_local')
+    nro_mesa = request.query_params.get('nro_mesa')
+
+    if not id_local or not nro_mesa:
+        return Response(
+            {"error": "Los parámetros 'id_local' y 'nro_mesa' son requeridos."},
+            status=400
+        )
+
+    try:
+        id_local = int(id_local)
+    except ValueError:
+        return Response({"error": "'id_local' debe ser un número entero."}, status=400)
+
+    tipos = services.obtener_tipos_registrados(id_local=id_local, nro_mesa=nro_mesa)
+    return Response({"tipos_registrados": tipos})
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
